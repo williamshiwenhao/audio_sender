@@ -34,7 +34,7 @@
 const char kInput[] = "audio/8k.raw";
 const char kConfigFile[] = "config.json";
 
-const int kCodecUnit = 1;
+int codec_unit = 1;
 
 class Timer {
  public:
@@ -80,10 +80,12 @@ void SendTest() {
   unsigned port = config_root["port"].asUInt();
   unsigned payload_type = config_root["payload type"].asUInt();
   std::string codec_type = config_root["codec type"].asString();
+  codec_unit = config_root["codec unit"].asInt();
   printf("[IP] %s\n", str_ip.c_str());
   printf("[Port] %u\n", port);
   printf("[Payload type] %u\n", payload_type);
   printf("[Codec type] %s\n", codec_type.c_str());
+  printf("[Codec unit] %d\n", codec_unit);
   Coder *p_encoder;
   if (codec_type == "pcmu") {
     p_encoder = new PcmUEnCoder;
@@ -125,7 +127,7 @@ void SendTest() {
   }
   in_fd.close();
   char codec_buff[1600];
-  int codec_uint_length = kPcmFrameLength * kCodecUnit;
+  int codec_uint_length = kPcmFrameLength * codec_unit;
   // Init Socket
   UdpSocket udp;
   if (udp.Init()) {
@@ -138,8 +140,8 @@ void SendTest() {
   Timer* timer = Timer::GetTimer();
   struct itimerval tick;
   memset(&tick, 0, sizeof(tick));
-  tick.it_value.tv_usec = 20 * kCodecUnit * 1000;
-  tick.it_interval.tv_usec = 20 * kCodecUnit * 1000;
+  tick.it_value.tv_usec = 20 * codec_unit * 1000;
+  tick.it_interval.tv_usec = 20 * codec_unit * 1000;
   if (setitimer(ITIMER_REAL, &tick, NULL) < 0) {
     fprintf(stderr, "[Error] Set timer error\n");
     return;
@@ -149,7 +151,7 @@ void SendTest() {
     int now_length = input_length;
     while (now_length >= codec_uint_length) {
       int rtp_len = rtp.GenerateRtpHeader((uint8_t*)codec_buff,
-                                          sizeof(codec_buff), kCodecUnit);
+                                          sizeof(codec_buff), codec_unit);
       if (rtp_len < 0) {
         fprintf(stderr, "[Error] Rtp error\n");
         delete[] in_buff;

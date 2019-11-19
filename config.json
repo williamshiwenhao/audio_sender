@@ -2,5 +2,6 @@
   "ip": "162.105.85.71",
   "port": 60001,
   "payload type": 1,
-  "codec type": "pcmu"
+  "codec type": "pcmu",
+  "codec unit": 3
 }
